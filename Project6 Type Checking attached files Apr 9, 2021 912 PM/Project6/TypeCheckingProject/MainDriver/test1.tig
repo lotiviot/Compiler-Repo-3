@@ -1,0 +1,29 @@
+/* Some basic typechecking tests. */
+(let in end;  /*this is to make sure you have correct your CFG */
+let var a := 21
+    var b := "Elena"
+    var c : int := "Daniel"
+    var d := nil
+    type t = a
+    type intarray = array of int
+	var aa := 1
+    type wrongarray = array of hello
+	var ab := 1
+	var ac := 1
+	var ad := 1
+in
+    a := a+b;
+    print(c);
+    b := 3;
+    for i := 0 to "David" do a := i*a;
+    i := i+1;
+    if a > 17 & a <= "foo" then 27;
+    intarray[17] of "cat";
+    intarray[b] of 5;
+    undefinedarray[b] of 5;
+    fact(9,999);
+    intarray[53] of 17;
+	undefinedfunctioncall(a, b);
+	undefinedarray[10] := 10
+end
+)

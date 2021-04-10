@@ -1,0 +1,85 @@
+Parsing successful!
+
+
+
+test1.tig:5.27: wrong type of initializing expression
+    var c : int := "Daniel"
+                          ^
+
+test1.tig:6.14: type of nil cannot be inferred
+    var d := nil
+             ^
+
+test1.tig:7.14: undefined type name
+    type t = a
+             ^
+
+test1.tig:10.23: undefined type
+    type wrongarray = array of hello
+                      ^
+
+test1.tig:15.12: int required
+    a := a+b;
+           ^
+
+test1.tig:16.11: wrong argument type
+    print(c);
+          ^
+
+test1.tig:17.5: Type mismatch in assignment
+    b := 3;
+    ^
+
+test1.tig:18.25: int required
+    for i := 0 to "David" do a := i*a;
+                        ^
+
+test1.tig:19.5: undefined variable
+    i := i+1;
+    ^
+
+test1.tig:20.17: Operands must have the same type
+    if a > 17 & a <= "foo" then 27;
+                ^
+
+test1.tig:20.33: valueless expression required
+    if a > 17 & a <= "foo" then 27;
+                                ^
+
+test1.tig:21.25: array initializer has wrong type
+    intarray[17] of "cat";
+                        ^
+
+test1.tig:22.14: int required
+    intarray[b] of 5;
+             ^
+
+test1.tig:23.5: undefined type name
+    undefinedarray[b] of 5;
+    ^
+
+test1.tig:23.20: int required
+    undefinedarray[b] of 5;
+                   ^
+
+test1.tig:23.5: array required
+    undefinedarray[b] of 5;
+    ^
+
+test1.tig:24.5: undefined function name
+    fact(9,999);
+    ^
+
+test1.tig:26.2: undefined function name
+        undefinedfunctioncall(a, b);
+        ^
+
+test1.tig:27.2: undefined variable
+        undefinedarray[10] := 10
+        ^
+
+test1.tig:27.2: ARRAY required
+        undefinedarray[10] := 10
+        ^
+
+The program has semantic errors!

@@ -1,0 +1,34 @@
+[When you submited the time log, please remove all sentences enclosed by square brackets]
+[In the whole document, use 4 white spaces for each indentation. NEVER USE TAB!!!!!]
+
+Report submited at 2012-09-18 4:30 [Replace the date and time by the real information]
+
+Role [This section is required for each report, and should remain the same for all reports)
+    Assignment Leader: FirstName LastName  (should be one person)
+    Programmer       : FirstName LastName  (One or two person)
+    Tester           : FirstName LastName  (One or two person)
+
+Progress [This section is required for each report]
+    Name of a team member
+        His/her marjor work since last time the time log has been submitted
+    Name of a team member
+        His/her marjor work since last time the time log has been submitted
+    [Repeat above for each team member]
+
+Challenging Issues [This section is optional]
+    List major problems conquered by team members or to be solved by team members.
+
+Work to be done [This section is required for each report]
+    Name of a team member
+        His/her future work before next deadline
+    Name of a team member
+        His/her future work before next deadline
+    [Repeat above for each team member]
+
+Meet deadline [This section is required for each report]
+    Name of Developer(s)
+        Will the developer(s) be able to finish and submit the work before the next
+	deadline?  If no, please explain why?
+    Name of Tester(s)
+        Will the tester(s) be able to finish and submit the work before the next
+	deadline?  If no, please explain why?

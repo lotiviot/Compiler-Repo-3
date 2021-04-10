@@ -1,0 +1,17 @@
+/* Some advanced typechecking tests. */
+let 
+in
+    break;
+    for i := 0 to (break; 10) do (
+      break;
+	  i
+    );
+    for i := 1 to 10 do (
+      i := i-1;			/* illegal */
+      let 
+		var i := 5
+      in
+        i := i*i		/* legal */
+      end
+    )
+end

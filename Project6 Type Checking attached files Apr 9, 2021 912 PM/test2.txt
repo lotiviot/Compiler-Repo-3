@@ -1,0 +1,21 @@
+Parsing successful!
+
+
+
+test2.tig:4.5: break is not nested in a while or for loop
+    break;
+    ^
+
+test2.tig:5.20: break is not nested in a while or for loop
+    for i := 0 to (break; 10) do (
+                   ^
+
+test2.tig:5.34: body of for loop should produce no value
+    for i := 0 to (break; 10) do (
+                                 ^
+
+test2.tig:10.7: illegal assignment to for-loop index
+      i := i-1;                 /* illegal */
+      ^
+
+The program has semantic errors!
