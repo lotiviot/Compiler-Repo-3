@@ -241,12 +241,10 @@ namespace semantics
 			if (dynamic_cast<const types::INT*>(lt) == NULL)
 			{
 				error(e->getLeft(), "int required");
-				return new types::INT();
 			}
 			if (dynamic_cast<const types::INT*>(rt) == NULL)
 			{
 				error(e->getRight(), "int required");
-				return new types::INT();
 			}
 			return new types::INT();
 		}
@@ -255,17 +253,14 @@ namespace semantics
 			if ((dynamic_cast<const types::INT*>(lt) == NULL) && (dynamic_cast<const types::STRING*>(lt) == NULL))
 			{
 				error(e->getLeft(), "int or string required");
-				return new types::INT();
 			}
 			if ((dynamic_cast<const types::INT*>(rt) == NULL) && (dynamic_cast<const types::STRING*>(rt) == NULL))
 			{
 				error(e->getRight(), "int or string required");
-				return new types::INT();
 			}
 			if (!(lt->coerceTo(rt)))
 			{
 				error(e, "incompatible types");
-				return new types::INT();
 			}
 			return new types::INT();
 		}
@@ -274,23 +269,19 @@ namespace semantics
 			if ((dynamic_cast<const types::INT*>(lt) == NULL) && (dynamic_cast<const types::STRING*>(lt) == NULL) && (dynamic_cast<const types::ARRAY*>(lt) == NULL) && (dynamic_cast<const types::RECORD*>(lt) == NULL) && (dynamic_cast<const types::NIL*>(lt) == NULL))
 			{
 				error(e->getLeft(), "int, string, array, record, or nil required");
-				return new types::INT();
 			}
 			if ((dynamic_cast<const types::INT*>(rt) == NULL) && (dynamic_cast<const types::STRING*>(rt) == NULL) && (dynamic_cast<const types::ARRAY*>(rt) == NULL) && (dynamic_cast<const types::RECORD*>(rt) == NULL) && (dynamic_cast<const types::NIL*>(rt) == NULL))
 			{
 				error(e->getRight(), "int, string, array, record, or nil required");
-				return new types::INT();
 			}
 
 			if (!(lt->coerceTo(rt)))
 			{
 				error(e, "incompatible types");
-				return new types::INT();
 			}
 			if ((dynamic_cast<const types::NIL*>(lt) != NULL) && (dynamic_cast<const types::NIL*>(rt) != NULL))
 			{
 				error(e, "both variables cannot be NIL");
-				return new types::INT();
 			}
 			return new types::INT();
 		}
@@ -377,7 +368,6 @@ namespace semantics
 					if (!(ta->coerceTo(tp)))
 					{
 						error(e, "parameter type must match");
-						return new types::INT();
 					}
 					cp_iter++;
 					c_arg = c_arg->getRest();
@@ -386,13 +376,11 @@ namespace semantics
 				if (c_arg != NULL && cp_iter == c_par.end())
 				{
 					error(e, "too many arguments");
-					return new types::INT();
 				}
 
 				if (c_arg == NULL && cp_iter != c_par.end())
 				{
 					error(e, "too few arguments");
-					return new types::INT();
 				}
 
 				return t->actual();
@@ -479,7 +467,6 @@ namespace semantics
 		if (!(te->coerceTo(t)))
 		{
 			error(e, "incompatible types");
-			return new types::INT();
 		}
 		return new types::VOID();
 
@@ -507,7 +494,6 @@ namespace semantics
 		if (dynamic_cast<const types::INT*>(t) == NULL)
 		{
 			error(e->getTest(), "int type required");
-			return new types::INT();
 		}
 
 		const types::Type* t1 = visit(e->getThenClause());
@@ -569,14 +555,12 @@ namespace semantics
 		if (dynamic_cast<const types::INT*>(t) == NULL)
 		{
 			error(e, "valueless expression required");
-			return new types::INT();
 		}
 		const types::Type* t1 = visit(e->getBody());
 
 		if (dynamic_cast<const types::VOID*>(t1) != NULL)
 		{
 			error(e, "Void in while body");
-			return new types::INT();
 		}
 		return new types::VOID();
 
@@ -605,21 +589,18 @@ namespace semantics
 		if (dynamic_cast<const types::INT*>(t1) == NULL)
 		{
 			error(e, "second exp must be an INT");
-			return new types::INT();
 		}
 		const types::Type* t2 = visit(e->getHi());
 
 		if (dynamic_cast<const types::Type*>(t2) == NULL)
 		{
 			error(e, "third exp must be an INT");
-			return new types::INT();
 		}
 		const types::Type* t3 = visit(e->getBody());
 
 		if (dynamic_cast<const types::VOID*>(t3) == NULL)
 		{
 			error(e, "body must be a VOID");
-			return new types::INT();
 		}
 		env.getVarEnv()->endScope();
 
@@ -704,11 +685,10 @@ namespace semantics
 		if (!(env.getTypeEnv()->contains(e->getType())))
 		{
 			error(e, "undefined type");
-			return new types::INT();
 		}
 		if (env.getTypeEnv()->contains(e->getType()))
 		{
-			// Assume t is ARRAY of INT
+			t = new types::ARRAY(new types::INT());
 		}
 		else
 		{
@@ -716,7 +696,7 @@ namespace semantics
 			if (dynamic_cast<const types::ARRAY*>(t) == NULL)
 			{
 				error(e, "type is not an array");
-				// Let t be an ARRAY of INT
+				t = new types::ARRAY(new types::INT());
 			}
 		}
 
@@ -724,14 +704,12 @@ namespace semantics
 		if (dynamic_cast<const types::INT*>(t1) == NULL)
 		{
 			error(e, "size should be an INT");
-			return new types::INT();
 		}
 
 		const types::Type* t2 = visit(e->getInit());
 		if (!(t2->coerceTo(dynamic_cast<const types::ARRAY*>(t)->getElement())))
 		{
 			error(e, "types must match");
-			return new types::INT();
 		}
 
 		return t;
