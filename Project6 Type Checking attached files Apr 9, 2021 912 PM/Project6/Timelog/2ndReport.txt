@@ -1,0 +1,38 @@
+Report submitted at 2021-04-14 23:30
+
+
+Role 
+    Assignment Leader: Tristan Lotivio
+    Programmer           : Darien Kidwell
+    Tester                           : Daniel Cox
+
+
+Progress 
+    Tristan Lotivio
+    Prepared repository and scheduled meeting to preapare decomposition
+    Darien Kidwell
+    Prepared environment and begin requirement gathering
+    Daniel Cox 
+    Prepared a tiger program containing statements to satidfy all required test cases
+
+
+
+Challenging Issues
+    Planning for regular communication and initial project goal structure
+
+
+Work to be done
+    Tristan Lotivio
+    Monitor progress milestones and maintain repo branches
+    Darien Kidwell
+    Continue requirement gathering and development of goals
+    Daniel Cox 
+    Run test cases on Alpha and prepare test report
+        
+
+Meet deadline
+    Darien Kidwell
+     A working version of the program should be available, or close enough, to begin developing and applying early test cases.
+    Daniel Cox
+     Test report will be submitted 04-16-2021
+
