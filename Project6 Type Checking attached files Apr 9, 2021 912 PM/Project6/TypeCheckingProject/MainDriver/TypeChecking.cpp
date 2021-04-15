@@ -1,3 +1,14 @@
+/*
+PROGRAMMER: Darien Kidwell
+Project 6
+Alpha Due: 4/14/2021
+Project Due: 4/18/2021
+INSTRUCTOR: Dr. Zhijang Dong
+Desc: This is the alpha version of an implementation of typechecking.cpp which checks
+for types and reports type-related semantic errors
+*/
+
+
 #include "TypeChecking.h"
 
 using namespace symbol;
@@ -162,6 +173,31 @@ namespace semantics
 	{
 		//add your implementation here
 		//syntax: lvalue[index_exp]
+		//lvalue must be ARRAY
+		//index_exp must be INT
+
+		const types::Type* t = visit(v->getVar());
+
+		if (dynamic_cast<const types::ARRAY*>(t) == NULL)
+		{
+			error(v, "array required");
+			return new types::INT();
+		}
+		const types::Type* te = visit(v->getIndex());
+
+		if (dynamic_cast<const types::INT*>(te) == NULL)
+		{
+			error(v, "int required");
+			return new types::INT();
+		}
+		if (dynamic_cast<const types::ARRAY*>(t) == NULL)
+			return new types::INT();
+		else
+			return dynamic_cast<const types::ARRAY*>(t)->getElement();
+		
+
+
+
 		/*
 		Algorithm:
 			1.	Perform type checking on lvalue, and get its data type (say t)
@@ -176,6 +212,9 @@ namespace semantics
 					return the type of array element which can be
 					found at ((ARRAY *)t)
 		*/
+
+
+
 	}
 
 
@@ -183,6 +222,78 @@ namespace semantics
 	{
 		//add your implementation here
 		//syntax: left_exp Operator right_exp
+
+		const types::Type* lt = visit(e->getLeft());
+		const types::Type* rt = visit(e->getRight());
+		int oper = e->getOper();
+
+
+		/*
+		if (dynamic_cast<const types::FUNCTION*>(lt) != NULL)
+			lt = dynamic_cast<const types::FUNCTION*>(lt)->getResult();
+		if (dynamic_cast<const types::FUNCTION*>(rt) != NULL)
+			rt = dynamic_cast<const types::FUNCTION*>(rt)->getResult();
+		*/
+
+
+		if (oper < 4)
+		{
+			if (dynamic_cast<const types::INT*>(lt) == NULL)
+			{
+				error(e->getLeft(), "int required");
+				return new types::INT();
+			}
+			if (dynamic_cast<const types::INT*>(rt) == NULL)
+			{
+				error(e->getRight(), "int required");
+				return new types::INT();
+			}
+			return new types::INT();
+		}
+		else if (oper > 5)
+		{
+			if ((dynamic_cast<const types::INT*>(lt) == NULL) && (dynamic_cast<const types::STRING*>(lt) == NULL))
+			{
+				error(e->getLeft(), "int or string required");
+				return new types::INT();
+			}
+			if ((dynamic_cast<const types::INT*>(rt) == NULL) && (dynamic_cast<const types::STRING*>(rt) == NULL))
+			{
+				error(e->getRight(), "int or string required");
+				return new types::INT();
+			}
+			if (!(lt->coerceTo(rt)))
+			{
+				error(e, "incompatible types");
+				return new types::INT();
+			}
+			return new types::INT();
+		}
+		else
+		{
+			if ((dynamic_cast<const types::INT*>(lt) == NULL) && (dynamic_cast<const types::STRING*>(lt) == NULL) && (dynamic_cast<const types::ARRAY*>(lt) == NULL) && (dynamic_cast<const types::RECORD*>(lt) == NULL) && (dynamic_cast<const types::NIL*>(lt) == NULL))
+			{
+				error(e->getLeft(), "int, string, array, record, or nil required");
+				return new types::INT();
+			}
+			if ((dynamic_cast<const types::INT*>(rt) == NULL) && (dynamic_cast<const types::STRING*>(rt) == NULL) && (dynamic_cast<const types::ARRAY*>(rt) == NULL) && (dynamic_cast<const types::RECORD*>(rt) == NULL) && (dynamic_cast<const types::NIL*>(rt) == NULL))
+			{
+				error(e->getRight(), "int, string, array, record, or nil required");
+				return new types::INT();
+			}
+
+			if (!(lt->coerceTo(rt)))
+			{
+				error(e, "incompatible types");
+				return new types::INT();
+			}
+			if ((dynamic_cast<const types::NIL*>(lt) != NULL) && (dynamic_cast<const types::NIL*>(rt) != NULL))
+			{
+				error(e, "both variables cannot be NIL");
+				return new types::INT();
+			}
+			return new types::INT();
+		}
 		/*
 		Algorithm:
 			1.	Perform type checking on left_exp, and get its data type (say lt)
@@ -233,6 +344,62 @@ namespace semantics
 	{
 		//add your implementation here
 		//syntax: fname(exp1, exp2, ..., expn)
+
+		string fname = e->getFunc();
+
+		if (!(env.getVarEnv()->contains(fname)))
+		{
+			error(e, "undefined function name");
+			return new types::INT();
+		}
+		else
+		{
+			const types::Type* t = env.getVarEnv()->lookup(fname).info->actual();
+
+			if (dynamic_cast<const types::FUNCTION*>(t) == NULL)
+			{
+				error(e, "this is not a function type");
+				return new types::INT();
+			}
+			else
+			{
+				const ExpList* c_arg = e->getArgs();
+
+				vector<const types::Type*> c_par;
+				c_par = dynamic_cast<const types::FUNCTION*>(env.getVarEnv()->lookup(fname).info)->getFieldType();
+				vector<const types::Type*>::iterator cp_iter = c_par.begin();
+
+				while (c_arg != NULL && cp_iter != c_par.end())
+				{
+					const types::Type* ta = visit(c_arg->getHead());
+					const types::Type* tp = (*cp_iter);
+
+					if (!(ta->coerceTo(tp)))
+					{
+						error(e, "parameter type must match");
+						return new types::INT();
+					}
+					cp_iter++;
+					c_arg = c_arg->getRest();
+				}
+
+				if (c_arg != NULL && cp_iter == c_par.end())
+				{
+					error(e, "too many arguments");
+					return new types::INT();
+				}
+
+				if (c_arg == NULL && cp_iter != c_par.end())
+				{
+					error(e, "too few arguments");
+					return new types::INT();
+				}
+
+				return t->actual();
+			}
+		}
+
+
 		/*
 		Algorithm:
 			things that can go wrong:
@@ -274,6 +441,25 @@ namespace semantics
 	{
 		//add your implementation here
 		//syntax: exp1; exp2; exp3; ....; expn
+
+		const ExpList* exps = e->getList();
+		const types::Type* t;
+
+		if (exps == NULL)
+		{
+			return new types::VOID();
+		}
+		else
+		{
+			while (exps != NULL)
+			{
+				t = visit(exps->getHead());
+				exps = exps->getRest();
+			}
+		}
+		return t->actual();
+
+
 		/*
 		Algorithm:
 			for each expression exp_i in the list
@@ -286,6 +472,17 @@ namespace semantics
 	{
 		//add your implementation here
 		//syntax: lvalue := exp
+
+		const types::Type* t = visit(e->getVar());
+		const types::Type* te = visit(e->getExp());
+
+		if (!(te->coerceTo(t)))
+		{
+			error(e, "incompatible types");
+			return new types::INT();
+		}
+		return new types::VOID();
+
 		/*
 		Algorithm:
 			1.	perform type checking on lvalue and save its data type to t
@@ -304,6 +501,43 @@ namespace semantics
 		//			else
 		//				exp2
 
+
+		const types::Type* t = visit(e->getTest());
+		
+		if (dynamic_cast<const types::INT*>(t) == NULL)
+		{
+			error(e->getTest(), "int type required");
+			return new types::INT();
+		}
+
+		const types::Type* t1 = visit(e->getThenClause());
+
+		if (e->getElseClause() == NULL)
+		{
+			if (dynamic_cast<const types::VOID*>(t1) == NULL)
+			{
+				error(e, "then should be void");
+				return new types::VOID();
+			}
+		}
+		else
+		{
+			const types::Type* t2 = visit(e->getElseClause());
+
+			if (t1->coerceTo(t2))
+			{
+				return t2->actual();
+			}
+			else if (t2->coerceTo(t1))
+			{
+				return t1->actual();
+			}
+			else
+			{
+				error(e, "incompatible types");
+				return t1->actual();
+			}
+		}
 		/*
 		Algorithm:
 			1.	perform type checking on test and save its data type to t
@@ -329,6 +563,23 @@ namespace semantics
 	{
 		//add your implementation here
 		//syntax: while test do exp1
+
+		const types::Type* t = visit(e->getTest());
+
+		if (dynamic_cast<const types::INT*>(t) == NULL)
+		{
+			error(e, "valueless expression required");
+			return new types::INT();
+		}
+		const types::Type* t1 = visit(e->getBody());
+
+		if (dynamic_cast<const types::VOID*>(t1) != NULL)
+		{
+			error(e, "Void in while body");
+			return new types::INT();
+		}
+		return new types::VOID();
+
 		/*
 		Algorithm:
 			1.	perform type checking on test and save its data type to t
@@ -343,6 +594,36 @@ namespace semantics
 	{
 		//add your implementation here
 		//syntax: for vname := exp1 to exp2 do exp3
+
+		string vname;
+		env.getVarEnv()->beginScope();
+
+		const types::Type* t = visit(e->getVar());
+		vname = e->getVar()->getName();
+		const types::Type* t1 = env.getVarEnv()->lookup(vname).info->actual();
+
+		if (dynamic_cast<const types::INT*>(t1) == NULL)
+		{
+			error(e, "second exp must be an INT");
+			return new types::INT();
+		}
+		const types::Type* t2 = visit(e->getHi());
+
+		if (dynamic_cast<const types::Type*>(t2) == NULL)
+		{
+			error(e, "third exp must be an INT");
+			return new types::INT();
+		}
+		const types::Type* t3 = visit(e->getBody());
+
+		if (dynamic_cast<const types::VOID*>(t3) == NULL)
+		{
+			error(e, "body must be a VOID");
+			return new types::INT();
+		}
+		env.getVarEnv()->endScope();
+
+		return new types::VOID();
 		/*
 		Algorithm:
 			1.	Create a new scope for var/function symbol table
@@ -363,6 +644,9 @@ namespace semantics
 	const types::Type* TypeChecking::visit(const BreakExp *e)
 	{
 		//add your implementation here
+
+		return new types::VOID();
+
 		/*Algorithm:
 			return VOID if  you don't want bonus points.
 		*/
@@ -372,6 +656,30 @@ namespace semantics
 	{
 		//add your implementation here
 		//syntax: let decls in exps end
+
+		env.getVarEnv()->beginScope();
+		env.getTypeEnv()->beginScope();
+
+		const DecList* dec_list = e->getDecs();
+
+
+		if (dec_list != NULL)
+		{
+			const Dec* decl = dec_list->getHead();
+			while (dec_list != NULL)
+			{
+				visit(decl);
+				dec_list = dec_list->getRest();
+				if (dec_list != NULL)
+					decl = dec_list->getHead();
+			}
+		}
+		const types::Type* t = visit(e->getBody());
+
+		env.getTypeEnv()->endScope();
+		env.getVarEnv()->endScope();
+
+		return t;
 		/*
 		Algorithm:
 			1.	Create a new scope for var/function symbol table
@@ -390,6 +698,43 @@ namespace semantics
 	{
 		//add your implementation here
 		//syntax: array_type [exp1] of exp2
+
+		const types::Type* t;
+
+		if (!(env.getTypeEnv()->contains(e->getType())))
+		{
+			error(e, "undefined type");
+			return new types::INT();
+		}
+		if (env.getTypeEnv()->contains(e->getType()))
+		{
+			// Assume t is ARRAY of INT
+		}
+		else
+		{
+			t = env.getTypeEnv()->lookup(e->getType()).info->actual();
+			if (dynamic_cast<const types::ARRAY*>(t) == NULL)
+			{
+				error(e, "type is not an array");
+				// Let t be an ARRAY of INT
+			}
+		}
+
+		const types::Type* t1 = visit(e->getSize());
+		if (dynamic_cast<const types::INT*>(t1) == NULL)
+		{
+			error(e, "size should be an INT");
+			return new types::INT();
+		}
+
+		const types::Type* t2 = visit(e->getInit());
+		if (!(t2->coerceTo(dynamic_cast<const types::ARRAY*>(t)->getElement())))
+		{
+			error(e, "types must match");
+			return new types::INT();
+		}
+
+		return t;
 		/*
 		Algorithm:
 			1.	if array_type exists. 
@@ -421,6 +766,48 @@ namespace semantics
 	{
 		//add your implementation here
 		// syntax: var vname : Type = exp1
+
+		const types::Type* type;
+		const types::Type* tt;
+
+		string vname = d->getName();
+
+		if (env.getVarEnv()->localContains(vname))
+			error(d, "variable already defined");
+
+		if (d->getType() != NULL)
+		{
+			tt = new types::INT();
+
+			if (!(env.getTypeEnv()->contains(d->getType()->getName())))
+			{
+				error(d, "undefined type name");
+			}
+			else
+			{
+				tt = env.getTypeEnv()->lookup(d->getType()->getName()).info->actual();
+			}
+			const types::Type* t1 = visit(d->getInit());
+
+			if (!(t1->coerceTo(tt)))
+				error(d, "incompatible types");
+
+			types::NAME* v = new types::NAME(d->getName());
+			type = visit(d->getType());
+			v->bind((types::Type*)type);
+			insertVar(vname, SymTabEntry(env.getVarEnv()->getLevel(), v, d));
+		}
+		else
+		{
+			const types::Type* t1 = visit(d->getInit());
+			types::NAME* v = new types::NAME(d->getName());
+			type = visit(d->getType());
+			v->bind((types::Type*)type);
+			insertVar(vname, SymTabEntry(env.getVarEnv()->getLevel(), v, d));
+		}
+
+		return NULL;
+
 		/*
 		Algorithm:
 			1.	if vname is defined locally  (use localContains function)

@@ -11,7 +11,7 @@ Progress
     Tristan Lotivio
     Prepared repository and scheduled meeting to preapare decomposition
     Darien Kidwell
-    Prepared environment and begin requirement gathering
+    Prepared an alpha version of the program, still has bugs to work out
     Daniel Cox 
     Prepared a tiger program containing statements to satidfy all required test cases
 
@@ -25,14 +25,14 @@ Work to be done
     Tristan Lotivio
     Monitor progress milestones and maintain repo branches
     Darien Kidwell
-    Continue requirement gathering and development of goals
+    Complete debugging of Alpha and prepare final program
     Daniel Cox 
     Run test cases on Alpha and prepare test report
         
 
 Meet deadline
     Darien Kidwell
-     A working version of the program should be available, or close enough, to begin developing and applying early test cases.
+     Final program will be submitted by 4/18/2021
     Daniel Cox
      Test report will be submitted 04-16-2021
 
