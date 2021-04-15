@@ -9,7 +9,7 @@ Role
 
 Progress 
     Tristan Lotivio
-    Prepared repository and scheduled meeting to preapare decomposition
+    Maintained repository and kept communication on project progress
     Darien Kidwell
     Prepared an alpha version of the program, still has bugs to work out
     Daniel Cox 
@@ -18,7 +18,7 @@ Progress
 
 
 Challenging Issues
-    Planning for regular communication and initial project goal structure
+    communication good, maintaining comms to get project done in timely manner
 
 
 Work to be done

@@ -1,15 +1,15 @@
-Report submitted at 2021-03-26 23:30
+Report submitted at 2021-04-09 23:30
 
 
 Role 
-    Assignment Leader: Tristan Lotivio
-    Programmer           : Darien Kidwell
-    Tester                           : Daniel Cox
+    Assignment Leader		: Tristan Lotivio
+    Programmer           	: Darien Kidwell
+    Tester                      : Daniel Cox
 
 
 Progress 
     Tristan Lotivio
-    Prepared repository and scheduled meeting to preapare decomposition
+    Prepared repository and scheduled meeting to prepare decomposition
     Darien Kidwell
     Prepared environment and begin requirement gathering
     Daniel Cox 
@@ -23,7 +23,7 @@ Challenging Issues
 
 Work to be done
     Tristan Lotivio
-    Monitor progress milestones and maintain repo branches
+    Monitor progress milestones and maintain repo main branch
     Darien Kidwell
     Continue requirement gathering and development of goals
     Daniel Cox 
@@ -34,5 +34,5 @@ Meet deadline
     Darien Kidwell
      A working version of the program should be available, or close enough, to begin developing and applying early test cases.
     Daniel Cox
-     Work with Tristan to develop understanding of needs and test cases.
+     Work with Darien to develop understanding of needs and test cases.
 
