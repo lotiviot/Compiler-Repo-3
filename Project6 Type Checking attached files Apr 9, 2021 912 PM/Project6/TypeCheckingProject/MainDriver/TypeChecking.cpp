@@ -282,9 +282,33 @@ namespace semantics
 			{
 				error(e->getRight(), "exps must be int, string, array, record, or nil");
 			}
+
+			if (dynamic_cast<const types::NIL*>(lt) != NULL)
+			{
+				if (dynamic_cast<const types::ARRAY*>(rt) == NULL
+					&& dynamic_cast<const types::RECORD*>(rt) == NULL)
+				{
+					error(e->getRight(), "exp must be array or record type");
+				}
+			}
+
+			if (dynamic_cast<const types::NIL*>(rt) != NULL)
+			{
+				if (dynamic_cast<const types::ARRAY*>(lt) == NULL
+					&& dynamic_cast<const types::RECORD*>(lt) == NULL)
+				{
+					error(e->getLeft(), "exp must be array or record type");
+				}
+			}
+
 			if (!(visit(e->getLeft()))->coerceTo((visit(e->getRight()))))
 			{
 				error(e, "Operands must have the same type");
+			}
+			if (dynamic_cast<const types::NIL*>(lt) != NULL
+				&& dynamic_cast<const types::NIL*>(rt) != NULL)
+			{
+				error(e, "Both exps cannot be nil");
 			}
 			return new types::INT();
 		}
