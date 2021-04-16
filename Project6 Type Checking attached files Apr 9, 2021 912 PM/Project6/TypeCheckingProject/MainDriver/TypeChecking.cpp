@@ -182,6 +182,7 @@ namespace semantics
 		{
 			error(v, "array required");
 			return new types::INT();
+
 		}
 		const types::Type* te = visit(v->getIndex());
 
@@ -189,6 +190,7 @@ namespace semantics
 		{
 			error(v, "int required");
 			return new types::INT();
+
 		}
 		if (dynamic_cast<const types::ARRAY*>(t) == NULL)
 			return new types::INT();
@@ -228,60 +230,83 @@ namespace semantics
 		int oper = e->getOper();
 
 
-		/*
+		
 		if (dynamic_cast<const types::FUNCTION*>(lt) != NULL)
 			lt = dynamic_cast<const types::FUNCTION*>(lt)->getResult();
 		if (dynamic_cast<const types::FUNCTION*>(rt) != NULL)
 			rt = dynamic_cast<const types::FUNCTION*>(rt)->getResult();
-		*/
+		
 
-
+		
 		if (oper < 4)
 		{
 			if (dynamic_cast<const types::INT*>(lt) == NULL)
 			{
 				error(e->getLeft(), "int required");
+				return new types::INT();
+
 			}
 			if (dynamic_cast<const types::INT*>(rt) == NULL)
 			{
 				error(e->getRight(), "int required");
+				return new types::INT();
+
 			}
 			return new types::INT();
 		}
 		else if (oper > 5)
 		{
-			if ((dynamic_cast<const types::INT*>(lt) == NULL) && (dynamic_cast<const types::STRING*>(lt) == NULL))
+			if ((dynamic_cast<const types::INT*>(lt) == NULL) 
+				&& (dynamic_cast<const types::STRING*>(lt) == NULL))
 			{
 				error(e->getLeft(), "int or string required");
+				return new types::INT();
+
 			}
-			if ((dynamic_cast<const types::INT*>(rt) == NULL) && (dynamic_cast<const types::STRING*>(rt) == NULL))
+			if ((dynamic_cast<const types::INT*>(rt) == NULL) 
+				&& (dynamic_cast<const types::STRING*>(rt) == NULL))
 			{
 				error(e->getRight(), "int or string required");
+				return new types::INT();
+
 			}
-			if (!(lt->coerceTo(rt)))
+			//if (!((visit(e->getLeft()))->coerceTo(visit(e->getRight()))))
+			if (!lt->coerceTo(rt))
 			{
 				error(e, "incompatible types");
+				return new types::INT();
+
 			}
 			return new types::INT();
 		}
 		else
 		{
-			if ((dynamic_cast<const types::INT*>(lt) == NULL) && (dynamic_cast<const types::STRING*>(lt) == NULL) && (dynamic_cast<const types::ARRAY*>(lt) == NULL) && (dynamic_cast<const types::RECORD*>(lt) == NULL) && (dynamic_cast<const types::NIL*>(lt) == NULL))
+			if (dynamic_cast<const types::INT*>(lt) == NULL
+				&& dynamic_cast<const types::STRING*>(lt) == NULL
+				&& dynamic_cast<const types::ARRAY*>(lt) == NULL
+				&& dynamic_cast<const types::RECORD*>(lt) == NULL
+				&& dynamic_cast<const types::NIL*>(lt) == NULL)
 			{
-				error(e->getLeft(), "int, string, array, record, or nil required");
-			}
-			if ((dynamic_cast<const types::INT*>(rt) == NULL) && (dynamic_cast<const types::STRING*>(rt) == NULL) && (dynamic_cast<const types::ARRAY*>(rt) == NULL) && (dynamic_cast<const types::RECORD*>(rt) == NULL) && (dynamic_cast<const types::NIL*>(rt) == NULL))
-			{
-				error(e->getRight(), "int, string, array, record, or nil required");
-			}
+				error(e->getLeft(), "exps must be int, string, array, record, or nil");
+				return new types::INT();
 
-			if (!(lt->coerceTo(rt)))
+			}
+			if (dynamic_cast<const types::INT*>(rt) == NULL
+				&& dynamic_cast<const types::STRING*>(rt) == NULL
+				&& dynamic_cast<const types::ARRAY*>(rt) == NULL
+				&& dynamic_cast<const types::RECORD*>(rt) == NULL
+				&& dynamic_cast<const types::NIL*>(rt) == NULL)
+			{
+				error(e->getRight(), "exps must be int, string, array, record, or nil");
+				return new types::INT();
+
+			}
+			//if (!(visit(e->getLeft()))->coerceTo((visit(e->getRight()))))
+			if (!lt->coerceTo(rt))
 			{
 				error(e, "incompatible types");
-			}
-			if ((dynamic_cast<const types::NIL*>(lt) != NULL) && (dynamic_cast<const types::NIL*>(rt) != NULL))
-			{
-				error(e, "both variables cannot be NIL");
+				return new types::INT();
+
 			}
 			return new types::INT();
 		}
@@ -368,6 +393,8 @@ namespace semantics
 					if (!(ta->coerceTo(tp)))
 					{
 						error(e, "parameter type must match");
+						return new types::INT();
+
 					}
 					cp_iter++;
 					c_arg = c_arg->getRest();
@@ -376,14 +403,18 @@ namespace semantics
 				if (c_arg != NULL && cp_iter == c_par.end())
 				{
 					error(e, "too many arguments");
+					return new types::INT();
+
 				}
 
 				if (c_arg == NULL && cp_iter != c_par.end())
 				{
 					error(e, "too few arguments");
+					return new types::INT();
+
 				}
 
-				return t->actual();
+				return t;
 			}
 		}
 
@@ -445,7 +476,7 @@ namespace semantics
 				exps = exps->getRest();
 			}
 		}
-		return t->actual();
+		return t;
 
 
 		/*
@@ -494,6 +525,8 @@ namespace semantics
 		if (dynamic_cast<const types::INT*>(t) == NULL)
 		{
 			error(e->getTest(), "int type required");
+			return new types::INT();
+
 		}
 
 		const types::Type* t1 = visit(e->getThenClause());
@@ -512,16 +545,16 @@ namespace semantics
 
 			if (t1->coerceTo(t2))
 			{
-				return t2->actual();
+				return t2;
 			}
 			else if (t2->coerceTo(t1))
 			{
-				return t1->actual();
+				return t1;
 			}
 			else
 			{
 				error(e, "incompatible types");
-				return t1->actual();
+				return t1;
 			}
 		}
 		/*
@@ -555,12 +588,16 @@ namespace semantics
 		if (dynamic_cast<const types::INT*>(t) == NULL)
 		{
 			error(e, "valueless expression required");
+			return new types::INT();
+
 		}
 		const types::Type* t1 = visit(e->getBody());
 
-		if (dynamic_cast<const types::VOID*>(t1) != NULL)
+		if (dynamic_cast<const types::VOID*>(t1) == NULL)
 		{
 			error(e, "Void in while body");
+			return new types::INT();
+
 		}
 		return new types::VOID();
 
@@ -585,22 +622,28 @@ namespace semantics
 		const types::Type* t = visit(e->getVar());
 		vname = e->getVar()->getName();
 		const types::Type* t1 = env.getVarEnv()->lookup(vname).info->actual();
-
+		
 		if (dynamic_cast<const types::INT*>(t1) == NULL)
 		{
-			error(e, "second exp must be an INT");
+			error(e, "exp must be an INT");
+			return new types::INT();
+
 		}
 		const types::Type* t2 = visit(e->getHi());
 
 		if (dynamic_cast<const types::Type*>(t2) == NULL)
 		{
-			error(e, "third exp must be an INT");
+			error(e, "second exp must be an INT");
+			return new types::INT();
+
 		}
 		const types::Type* t3 = visit(e->getBody());
 
 		if (dynamic_cast<const types::VOID*>(t3) == NULL)
 		{
 			error(e, "body must be a VOID");
+			return new types::INT();
+
 		}
 		env.getVarEnv()->endScope();
 
@@ -660,6 +703,7 @@ namespace semantics
 		env.getTypeEnv()->endScope();
 		env.getVarEnv()->endScope();
 
+
 		return t;
 		/*
 		Algorithm:
@@ -668,7 +712,7 @@ namespace semantics
 			3.	for each decl in the declaration list
 					perform type checking on the decl
 			4.	Perform type checking on exps and save its data type to t
-			5.	if t is an VOID, report an error (???)
+			5.	if t is an VOID, report an error (???) -- stated in class that this is not necessary
 			6.	end scope of both symbol tables
 			7.	return t;
 
@@ -685,6 +729,8 @@ namespace semantics
 		if (!(env.getTypeEnv()->contains(e->getType())))
 		{
 			error(e, "undefined type");
+			return new types::INT();
+
 		}
 		if (env.getTypeEnv()->contains(e->getType()))
 		{
@@ -704,12 +750,16 @@ namespace semantics
 		if (dynamic_cast<const types::INT*>(t1) == NULL)
 		{
 			error(e, "size should be an INT");
+			return new types::INT();
+
 		}
 
 		const types::Type* t2 = visit(e->getInit());
 		if (!(t2->coerceTo(dynamic_cast<const types::ARRAY*>(t)->getElement())))
 		{
 			error(e, "types must match");
+			return new types::INT();
+
 		}
 
 		return t;
@@ -751,8 +801,11 @@ namespace semantics
 		string vname = d->getName();
 
 		if (env.getVarEnv()->localContains(vname))
+		{
 			error(d, "variable already defined");
+			return new types::INT();
 
+		}
 		if (d->getType() != NULL)
 		{
 			tt = new types::INT();
@@ -760,6 +813,8 @@ namespace semantics
 			if (!(env.getTypeEnv()->contains(d->getType()->getName())))
 			{
 				error(d, "undefined type name");
+				return new types::INT();
+
 			}
 			else
 			{
@@ -768,7 +823,10 @@ namespace semantics
 			const types::Type* t1 = visit(d->getInit());
 
 			if (!(t1->coerceTo(tt)))
+			{
 				error(d, "incompatible types");
+				return new types::INT();
+			}
 
 			types::NAME* v = new types::NAME(d->getName());
 			type = visit(d->getType());
