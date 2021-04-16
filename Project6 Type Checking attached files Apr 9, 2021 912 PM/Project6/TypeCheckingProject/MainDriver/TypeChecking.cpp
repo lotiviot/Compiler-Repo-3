@@ -180,22 +180,18 @@ namespace semantics
 
 		if (dynamic_cast<const types::ARRAY*>(t) == NULL)
 		{
-			error(v, "array required");
-			return new types::INT();
-
+			error(v, "ARRAY required");
 		}
 		const types::Type* te = visit(v->getIndex());
 
 		if (dynamic_cast<const types::INT*>(te) == NULL)
 		{
-			error(v, "int required");
-			return new types::INT();
-
+			error(v->getIndex(), "int required");
 		}
 		if (dynamic_cast<const types::ARRAY*>(t) == NULL)
 			return new types::INT();
 		else
-			return dynamic_cast<const types::ARRAY*>(t)->getElement();
+			return ((types::ARRAY*)t)->getElement();
 		
 
 
@@ -243,14 +239,10 @@ namespace semantics
 			if (dynamic_cast<const types::INT*>(lt) == NULL)
 			{
 				error(e->getLeft(), "int required");
-				return new types::INT();
-
 			}
 			if (dynamic_cast<const types::INT*>(rt) == NULL)
 			{
 				error(e->getRight(), "int required");
-				return new types::INT();
-
 			}
 			return new types::INT();
 		}
@@ -260,22 +252,15 @@ namespace semantics
 				&& (dynamic_cast<const types::STRING*>(lt) == NULL))
 			{
 				error(e->getLeft(), "int or string required");
-				return new types::INT();
-
 			}
 			if ((dynamic_cast<const types::INT*>(rt) == NULL) 
 				&& (dynamic_cast<const types::STRING*>(rt) == NULL))
 			{
 				error(e->getRight(), "int or string required");
-				return new types::INT();
-
 			}
-			//if (!((visit(e->getLeft()))->coerceTo(visit(e->getRight()))))
-			if (!lt->coerceTo(rt))
+			if (!((visit(e->getLeft()))->coerceTo(visit(e->getRight()))))
 			{
-				error(e, "incompatible types");
-				return new types::INT();
-
+				error(e, "Operands must have the same type");
 			}
 			return new types::INT();
 		}
@@ -288,8 +273,6 @@ namespace semantics
 				&& dynamic_cast<const types::NIL*>(lt) == NULL)
 			{
 				error(e->getLeft(), "exps must be int, string, array, record, or nil");
-				return new types::INT();
-
 			}
 			if (dynamic_cast<const types::INT*>(rt) == NULL
 				&& dynamic_cast<const types::STRING*>(rt) == NULL
@@ -298,15 +281,10 @@ namespace semantics
 				&& dynamic_cast<const types::NIL*>(rt) == NULL)
 			{
 				error(e->getRight(), "exps must be int, string, array, record, or nil");
-				return new types::INT();
-
 			}
-			//if (!(visit(e->getLeft()))->coerceTo((visit(e->getRight()))))
-			if (!lt->coerceTo(rt))
+			if (!(visit(e->getLeft()))->coerceTo((visit(e->getRight()))))
 			{
-				error(e, "incompatible types");
-				return new types::INT();
-
+				error(e, "Operands must have the same type");
 			}
 			return new types::INT();
 		}
@@ -392,9 +370,7 @@ namespace semantics
 
 					if (!(ta->coerceTo(tp)))
 					{
-						error(e, "parameter type must match");
-						return new types::INT();
-
+						error(e->getArgs()->getHead(), "wrong argument type");
 					}
 					cp_iter++;
 					c_arg = c_arg->getRest();
@@ -403,15 +379,11 @@ namespace semantics
 				if (c_arg != NULL && cp_iter == c_par.end())
 				{
 					error(e, "too many arguments");
-					return new types::INT();
-
 				}
 
 				if (c_arg == NULL && cp_iter != c_par.end())
 				{
 					error(e, "too few arguments");
-					return new types::INT();
-
 				}
 
 				return t;
@@ -494,10 +466,11 @@ namespace semantics
 
 		const types::Type* t = visit(e->getVar());
 		const types::Type* te = visit(e->getExp());
+		
 
 		if (!(te->coerceTo(t)))
 		{
-			error(e, "incompatible types");
+			error(e, "Type mismatch in assignment");
 		}
 		return new types::VOID();
 
@@ -524,9 +497,7 @@ namespace semantics
 		
 		if (dynamic_cast<const types::INT*>(t) == NULL)
 		{
-			error(e->getTest(), "int type required");
-			return new types::INT();
-
+			error(e->getTest(), "int required");
 		}
 
 		const types::Type* t1 = visit(e->getThenClause());
@@ -535,7 +506,7 @@ namespace semantics
 		{
 			if (dynamic_cast<const types::VOID*>(t1) == NULL)
 			{
-				error(e, "then should be void");
+				error(e->getThenClause(), "valueless expression required");
 				return new types::VOID();
 			}
 		}
@@ -553,7 +524,7 @@ namespace semantics
 			}
 			else
 			{
-				error(e, "incompatible types");
+				error(e, "Operands must have the same type");
 				return t1;
 			}
 		}
@@ -588,16 +559,12 @@ namespace semantics
 		if (dynamic_cast<const types::INT*>(t) == NULL)
 		{
 			error(e, "valueless expression required");
-			return new types::INT();
-
 		}
 		const types::Type* t1 = visit(e->getBody());
 
 		if (dynamic_cast<const types::VOID*>(t1) == NULL)
 		{
-			error(e, "Void in while body");
-			return new types::INT();
-
+			error(e, "void required");
 		}
 		return new types::VOID();
 
@@ -625,25 +592,20 @@ namespace semantics
 		
 		if (dynamic_cast<const types::INT*>(t1) == NULL)
 		{
-			error(e, "exp must be an INT");
-			return new types::INT();
-
+			error(e, "int required");
 		}
 		const types::Type* t2 = visit(e->getHi());
 
-		if (dynamic_cast<const types::Type*>(t2) == NULL)
+		if (dynamic_cast<const types::INT*>(t2) == NULL)
 		{
-			error(e, "second exp must be an INT");
-			return new types::INT();
-
+			error(e->getHi(), "int required");
 		}
 		const types::Type* t3 = visit(e->getBody());
 
 		if (dynamic_cast<const types::VOID*>(t3) == NULL)
 		{
-			error(e, "body must be a VOID");
-			return new types::INT();
-
+			error(e->getBody(), "void required");
+			
 		}
 		env.getVarEnv()->endScope();
 
@@ -726,14 +688,10 @@ namespace semantics
 
 		const types::Type* t;
 
-		if (!(env.getTypeEnv()->contains(e->getType())))
-		{
-			error(e, "undefined type");
-			return new types::INT();
 
-		}
-		if (env.getTypeEnv()->contains(e->getType()))
+		if (!env.getTypeEnv()->contains(e->getType()))
 		{
+			error(e, "undefined type name");
 			t = new types::ARRAY(new types::INT());
 		}
 		else
@@ -741,7 +699,7 @@ namespace semantics
 			t = env.getTypeEnv()->lookup(e->getType()).info->actual();
 			if (dynamic_cast<const types::ARRAY*>(t) == NULL)
 			{
-				error(e, "type is not an array");
+				error(e, "array required");
 				t = new types::ARRAY(new types::INT());
 			}
 		}
@@ -749,18 +707,19 @@ namespace semantics
 		const types::Type* t1 = visit(e->getSize());
 		if (dynamic_cast<const types::INT*>(t1) == NULL)
 		{
-			error(e, "size should be an INT");
-			return new types::INT();
-
+			error(e->getSize(), "int required");
 		}
 
 		const types::Type* t2 = visit(e->getInit());
-		if (!(t2->coerceTo(dynamic_cast<const types::ARRAY*>(t)->getElement())))
+		if (!(t2->coerceTo(((types::ARRAY*)t)->getElement())))
 		{
-			error(e, "types must match");
-			return new types::INT();
-
+			error(e->getInit(), "array initializer has the wrong type");
 		}
+
+		// This did not work correctly when placed at the top of the algorithm or within the suggested if
+		if (!env.getTypeEnv()->contains(e->getType()))
+			error(e, "array required");
+
 
 		return t;
 		/*
@@ -800,11 +759,10 @@ namespace semantics
 
 		string vname = d->getName();
 
+
 		if (env.getVarEnv()->localContains(vname))
 		{
-			error(d, "variable already defined");
-			return new types::INT();
-
+			error(d, "variable already defined");	
 		}
 		if (d->getType() != NULL)
 		{
@@ -813,33 +771,29 @@ namespace semantics
 			if (!(env.getTypeEnv()->contains(d->getType()->getName())))
 			{
 				error(d, "undefined type name");
-				return new types::INT();
-
+				
 			}
 			else
 			{
 				tt = env.getTypeEnv()->lookup(d->getType()->getName()).info->actual();
-			}
-			const types::Type* t1 = visit(d->getInit());
 
-			if (!(t1->coerceTo(tt)))
-			{
-				error(d, "incompatible types");
-				return new types::INT();
-			}
+				const types::Type* t1 = visit(d->getInit());
 
-			types::NAME* v = new types::NAME(d->getName());
-			type = visit(d->getType());
-			v->bind((types::Type*)type);
-			insertVar(vname, SymTabEntry(env.getVarEnv()->getLevel(), v, d));
+				if (!(t1->coerceTo(tt)))
+				{
+					error(d->getInit(), "wrong type of initializing expression");
+
+				}
+
+				insertVar(d->getName(), SymTabEntry(env.getVarEnv()->getLevel(), (types::Type*)tt, d));
+			}
 		}
 		else
 		{
-			const types::Type* t1 = visit(d->getInit());
-			types::NAME* v = new types::NAME(d->getName());
-			type = visit(d->getType());
-			v->bind((types::Type*)type);
-			insertVar(vname, SymTabEntry(env.getVarEnv()->getLevel(), v, d));
+			if (dynamic_cast<const types::NIL*>(visit(d->getInit())) != NULL)
+				error(d->getInit(), "type of nil cannot be inferred");
+
+			insertVar(d->getName(), SymTabEntry(env.getVarEnv()->getLevel(), (types::Type*)visit(d->getInit()), d));
 		}
 
 		return NULL;
