@@ -11,17 +11,16 @@ let	var a := 1
 	var b : int := 3
 	var c : int := "Dad"
 	var d : string := "heck"
-	var e := NIL
-	var n := NIL
+	var e := nil
 	type intArr = array of int
 	var arr := intArr [b] of 6
 in
 	a := 2 + d;
 	b := d + 2;
 	d := 2;
-	if(1<>e) then a := 66;
-	if(NIL=3) then a := 55;
-	if(NIL<>NIL) then a := 44;
+	if(1<>d) then a := 66;
+	if(nil=3) then a := 55;
+	if(nil<>nil) then a := 44;
 	if(arr > d) then d:= "uwu";
 	if(d < a) then d:= "still uwu";
 	badFunction(1);
@@ -31,7 +30,7 @@ in
 	size(e);
 	b := "umu";
 	if(d) then d:= "words";
-	if(1) then ();
+	if(1) then (print("cheese"));
 	if(a=4) then d else b;
 	while (b=3) do (print(5));
 	for id := "where" to 4 do (print(id));
