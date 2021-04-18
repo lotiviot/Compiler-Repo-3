@@ -1,10 +1,9 @@
 /*
 PROGRAMMER: Darien Kidwell
 Project 6
-Alpha Due: 4/14/2021
 Project Due: 4/18/2021
 INSTRUCTOR: Dr. Zhijang Dong
-Desc: This is the alpha version of an implementation of typechecking.cpp which checks
+Desc: This is the implementation of typechecking.cpp which checks
 for types and reports type-related semantic errors
 */
 
@@ -169,6 +168,8 @@ namespace semantics
 			6.		return INT.
 	}
 */
+
+	/* Begin My Implementation */
 	const types::Type* TypeChecking::visit(const SubscriptVar *v)
 	{
 		//add your implementation here
@@ -176,18 +177,26 @@ namespace semantics
 		//lvalue must be ARRAY
 		//index_exp must be INT
 
+		// Type checking on lvalue
+		// Giving its data type to t
 		const types::Type* t = visit(v->getVar());
 
+		// if t is not an ARRAY, report error
 		if (dynamic_cast<const types::ARRAY*>(t) == NULL)
 		{
 			error(v, "ARRAY required");
 		}
+		// Type checking on index_exp
+		// Giving its type to te
 		const types::Type* te = visit(v->getIndex());
 
+		// if te is not an INT, report error
 		if (dynamic_cast<const types::INT*>(te) == NULL)
 		{
 			error(v->getIndex(), "int required");
 		}
+
+		// if t is not ARRAY, return INT - else, return array element type at the given location
 		if (dynamic_cast<const types::ARRAY*>(t) == NULL)
 			return new types::INT();
 		else
@@ -221,19 +230,26 @@ namespace semantics
 		//add your implementation here
 		//syntax: left_exp Operator right_exp
 
+		// Typechecking on left_exp
+		// Giving its type to lt
 		const types::Type* lt = visit(e->getLeft());
+		
+		// Typechecking on right_exp
+		// Giving its type to rt
 		const types::Type* rt = visit(e->getRight());
+		
+		// Getting the operator (int because the type of operator is stored in an array in Absyn::OpExp and is accessible by index)
 		int oper = e->getOper();
 
 
-		
+		// if lt or rt are functions, acquire the result of the function to use for the respective exp
 		if (dynamic_cast<const types::FUNCTION*>(lt) != NULL)
 			lt = dynamic_cast<const types::FUNCTION*>(lt)->getResult();
 		if (dynamic_cast<const types::FUNCTION*>(rt) != NULL)
 			rt = dynamic_cast<const types::FUNCTION*>(rt)->getResult();
 		
 
-		
+		// Arithmetic Operator
 		if (oper < 4)
 		{
 			if (dynamic_cast<const types::INT*>(lt) == NULL)
@@ -246,7 +262,7 @@ namespace semantics
 			}
 			return new types::INT();
 		}
-		else if (oper > 5)
+		else if (oper > 5)	// GT, LT, GE, LE
 		{
 			if ((dynamic_cast<const types::INT*>(lt) == NULL) 
 				&& (dynamic_cast<const types::STRING*>(lt) == NULL))
@@ -264,7 +280,7 @@ namespace semantics
 			}
 			return new types::INT();
 		}
-		else
+		else	// Equal or Not Equal
 		{
 			if (dynamic_cast<const types::INT*>(lt) == NULL
 				&& dynamic_cast<const types::STRING*>(lt) == NULL
@@ -363,17 +379,21 @@ namespace semantics
 		//add your implementation here
 		//syntax: fname(exp1, exp2, ..., expn)
 
+		// Assign function name to fname
 		string fname = e->getFunc();
 
+		// Check if fname is already defined
 		if (!(env.getVarEnv()->contains(fname)))
 		{
 			error(e, "undefined function name");
 			return new types::INT();
 		}
-		else
+		else	// if fname is defined
 		{
+			// look up fname and assign its type to t
 			const types::Type* t = env.getVarEnv()->lookup(fname).info->actual();
 
+			// if t is not a function, report an error
 			if (dynamic_cast<const types::FUNCTION*>(t) == NULL)
 			{
 				error(e, "this is not a function type");
@@ -381,12 +401,20 @@ namespace semantics
 			}
 			else
 			{
+				
+				// c_arg and c_par
+				// c_arg = the first argument
+				// c_par = the first parameter
 				const ExpList* c_arg = e->getArgs();
 
 				vector<const types::Type*> c_par;
 				c_par = dynamic_cast<const types::FUNCTION*>(env.getVarEnv()->lookup(fname).info)->getFieldType();
 				vector<const types::Type*>::iterator cp_iter = c_par.begin();
 
+				// until either c_arg or c_par is NULL
+				// perform typechecking on each and give their types to ta and tp
+				// check that ta and tp are compatible types
+				// if not, report an error
 				while (c_arg != NULL && cp_iter != c_par.end())
 				{
 					const types::Type* ta = visit(c_arg->getHead());
@@ -400,11 +428,13 @@ namespace semantics
 					c_arg = c_arg->getRest();
 				}
 
+				// if c_par runs out before c_arg
 				if (c_arg != NULL && cp_iter == c_par.end())
 				{
 					error(e, "too many arguments");
 				}
 
+				// if c_arg runs out before c_par
 				if (c_arg == NULL && cp_iter != c_par.end())
 				{
 					error(e, "too few arguments");
@@ -457,15 +487,18 @@ namespace semantics
 		//add your implementation here
 		//syntax: exp1; exp2; exp3; ....; expn
 
+		// get the ExpList and give the values to exps
 		const ExpList* exps = e->getList();
 		const types::Type* t;
 
+		// if the list is empty
 		if (exps == NULL)
 		{
 			return new types::VOID();
 		}
 		else
 		{
+			// perform typechecking on each exp
 			while (exps != NULL)
 			{
 				t = visit(exps->getHead());
@@ -488,10 +521,11 @@ namespace semantics
 		//add your implementation here
 		//syntax: lvalue := exp
 
+		// typechecking on lvalue and exp, giving their types to t and te
 		const types::Type* t = visit(e->getVar());
 		const types::Type* te = visit(e->getExp());
 		
-
+		// if te and t are not compatible types
 		if (!(te->coerceTo(t)))
 		{
 			error(e, "Type mismatch in assignment");
@@ -516,16 +550,19 @@ namespace semantics
 		//			else
 		//				exp2
 
-
+		// typechecking on test and giving the type to t
 		const types::Type* t = visit(e->getTest());
 		
+		// if t is not an int
 		if (dynamic_cast<const types::INT*>(t) == NULL)
 		{
 			error(e->getTest(), "int required");
 		}
 
+		// typechecking on the then exp and giving its type to t1
 		const types::Type* t1 = visit(e->getThenClause());
 
+		// if-then statement (no else clause)
 		if (e->getElseClause() == NULL)
 		{
 			if (dynamic_cast<const types::VOID*>(t1) == NULL)
@@ -534,19 +571,21 @@ namespace semantics
 				return new types::VOID();
 			}
 		}
-		else
+		else // if-then-else statement
 		{
+			// typechecking on the else exp, giving its type to t2
 			const types::Type* t2 = visit(e->getElseClause());
 
+			// if t1 is compatible with t2
 			if (t1->coerceTo(t2))
 			{
 				return t2;
 			}
-			else if (t2->coerceTo(t1))
+			else if (t2->coerceTo(t1))	// if t2 is compatible with t1
 			{
 				return t1;
 			}
-			else
+			else	// t1 and t2 are not compatible
 			{
 				error(e, "Operands must have the same type");
 				return t1;
@@ -578,14 +617,19 @@ namespace semantics
 		//add your implementation here
 		//syntax: while test do exp1
 
+		// typechecking on the test exp and giving its type to t
 		const types::Type* t = visit(e->getTest());
 
+		// if t is not an int
 		if (dynamic_cast<const types::INT*>(t) == NULL)
 		{
 			error(e, "valueless expression required");
 		}
+
+		// typechecking on the body of the while and giving its type to t1
 		const types::Type* t1 = visit(e->getBody());
 
+		// if t1 is not void
 		if (dynamic_cast<const types::VOID*>(t1) == NULL)
 		{
 			error(e, "void required");
@@ -607,30 +651,44 @@ namespace semantics
 		//add your implementation here
 		//syntax: for vname := exp1 to exp2 do exp3
 
+		// initialize vname and begin new scope for var/function symbol table
 		string vname;
 		env.getVarEnv()->beginScope();
 
+		// typechecking on vname and giving the type to t
 		const types::Type* t = visit(e->getVar());
+
+		// looking up the type of vname in the symbol table and giving the type to t1
 		vname = e->getVar()->getName();
 		const types::Type* t1 = env.getVarEnv()->lookup(vname).info->actual();
 		
+
+		// if t1 is not an int
 		if (dynamic_cast<const types::INT*>(t1) == NULL)
 		{
 			error(e, "int required");
 		}
+
+		// typechecking on exp2 and giving the type to t2
 		const types::Type* t2 = visit(e->getHi());
 
+		// if t2 is not an int
 		if (dynamic_cast<const types::INT*>(t2) == NULL)
 		{
 			error(e->getHi(), "int required");
 		}
+
+		// typechecking on exp3 and giving the type to t3
 		const types::Type* t3 = visit(e->getBody());
 
+		// if t3 is not void
 		if (dynamic_cast<const types::VOID*>(t3) == NULL)
 		{
 			error(e->getBody(), "void required");
 			
 		}
+
+		// end scope for var/function symbol table
 		env.getVarEnv()->endScope();
 
 		return new types::VOID();
@@ -667,25 +725,32 @@ namespace semantics
 		//add your implementation here
 		//syntax: let decls in exps end
 
+		// begin new scope for var/function and tyope symbol table
 		env.getVarEnv()->beginScope();
 		env.getTypeEnv()->beginScope();
 
+		// get the dec list
 		const DecList* dec_list = e->getDecs();
 
-
+		// if the dec list exists
 		if (dec_list != NULL)
 		{
+			// get the first dec
 			const Dec* decl = dec_list->getHead();
+			// while the dec_list is not NULL
 			while (dec_list != NULL)
 			{
+				// typechecking on the current dec and update position in the list
 				visit(decl);
 				dec_list = dec_list->getRest();
 				if (dec_list != NULL)
 					decl = dec_list->getHead();
 			}
 		}
+		// typechecking on exps and giving its type to t
 		const types::Type* t = visit(e->getBody());
 
+		// end scope for var/function and type symbol table
 		env.getTypeEnv()->endScope();
 		env.getVarEnv()->endScope();
 
@@ -710,37 +775,48 @@ namespace semantics
 		//add your implementation here
 		//syntax: array_type [exp1] of exp2
 
+		// initialize Type* t
 		const types::Type* t;
 
-
+		// if array_type does not exist
 		if (!env.getTypeEnv()->contains(e->getType()))
 		{
 			error(e, "undefined type name");
+			// let t be ARRAY of INT
 			t = new types::ARRAY(new types::INT());
 		}
 		else
 		{
+			// look up type in the symbol table and give the type to t
 			t = env.getTypeEnv()->lookup(e->getType()).info->actual();
+			
+			// if t is not ARRAY
 			if (dynamic_cast<const types::ARRAY*>(t) == NULL)
 			{
 				error(e, "array required");
+				// let t be ARRAY of INT
 				t = new types::ARRAY(new types::INT());
 			}
 		}
 
+		// typechecking on array size exp and giving the type to t1
 		const types::Type* t1 = visit(e->getSize());
+
+		// if size is not an int
 		if (dynamic_cast<const types::INT*>(t1) == NULL)
 		{
 			error(e->getSize(), "int required");
 		}
 
+		// typechecking on exp2 and giving its type to t2
 		const types::Type* t2 = visit(e->getInit());
 		if (!(t2->coerceTo(((types::ARRAY*)t)->getElement())))
 		{
 			error(e->getInit(), "array initializer has the wrong type");
 		}
 
-		// This did not work correctly when placed at the top of the algorithm or within the suggested if
+		// This did not work correctly when placed at the top of the algorithm or within the suggested if, so I put it down here and it did
+		// if the array does not exist
 		if (!env.getTypeEnv()->contains(e->getType()))
 			error(e, "array required");
 
@@ -778,20 +854,24 @@ namespace semantics
 		//add your implementation here
 		// syntax: var vname : Type = exp1
 
+		// initialize variables
 		const types::Type* type;
 		const types::Type* tt;
 
 		string vname = d->getName();
 
-
+		// if the variable is already defined, locally
 		if (env.getVarEnv()->localContains(vname))
 		{
 			error(d, "variable already defined");	
 		}
+		// if the type is given
 		if (d->getType() != NULL)
 		{
+			//  let tt be int
 			tt = new types::INT();
 
+			// if type is not defined
 			if (!(env.getTypeEnv()->contains(d->getType()->getName())))
 			{
 				error(d, "undefined type name");
@@ -799,24 +879,30 @@ namespace semantics
 			}
 			else
 			{
+				// look up given type and give its value to tt
 				tt = env.getTypeEnv()->lookup(d->getType()->getName()).info->actual();
 
+				// typeechecking on exp1 and giving its value to t1
 				const types::Type* t1 = visit(d->getInit());
 
+				// if t1 is not compatible with tt
 				if (!(t1->coerceTo(tt)))
 				{
 					error(d->getInit(), "wrong type of initializing expression");
 
 				}
 
+				// insert vname into the var/function symbol table
 				insertVar(d->getName(), SymTabEntry(env.getVarEnv()->getLevel(), (types::Type*)tt, d));
 			}
 		}
 		else
 		{
+			// if t1 is nil
 			if (dynamic_cast<const types::NIL*>(visit(d->getInit())) != NULL)
 				error(d->getInit(), "type of nil cannot be inferred");
 
+			// insert vname into the var/function symbol table
 			insertVar(d->getName(), SymTabEntry(env.getVarEnv()->getLevel(), (types::Type*)visit(d->getInit()), d));
 		}
 
